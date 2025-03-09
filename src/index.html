@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Navigator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-4">
+    <div class="max-w-xl mx-auto">
+      <h1 class="text-2xl font-bold mb-4">Select a Directory</h1>
+      <div id="directory-container" class="grid grid-cols-3 gap-4 mb-4"></div>
+      <input
+        type="text"
+        id="path-input"
+        class="border p-2 w-full mb-4"
+        placeholder="Enter directory path"
+      />
+      <button
+        id="load-directories"
+        class="bg-blue-500 text-white px-4 py-2 rounded-md w-full"
+      >
+        Load Directories
+      </button>
+      <ul id="file-list" class="list-disc pl-6 mt-4"></ul>
+    </div>
+
+    <script>
+      const loadDirectoriesButton = document.getElementById('load-directories');
+      const pathInput = document.getElementById('path-input');
+      const directoryContainer = document.getElementById('directory-container');
+      const fileList = document.getElementById('file-list');
+
+      // Function to create a button for each directory
+      function createDirectoryButton(directory) {
+        const button = document.createElement('button');
+        button.textContent = directory.name;
+        button.classList.add(
+          'bg-gray-200',
+          'text-gray-800',
+          'px-4',
+          'py-2',
+          'rounded-md',
+          'w-full'
+        );
+        button.addEventListener('click', () => {
+          // Clear existing file list
+          fileList.innerHTML = '';
+          // Fetch and display files in the selected directory
+          window.electron.getDirectories(directory.path).then(files => {
+            files.forEach(file => {
+              const li = document.createElement('li');
+              li.textContent = file.name;
+              fileList.appendChild(li);
+            });
+          });
+        });
+        return button;
+      }
+
+      // Load directories when the button is clicked
+      loadDirectoriesButton.addEventListener('click', () => {
+        const dirPath = pathInput.value.trim() || ''; // Default to root if empty
+        directoryContainer.innerHTML = ''; // Clear existing buttons
+        window.electron.getDirectories(dirPath).then(directories => {
+          directories.forEach(directory => {
+            const button = createDirectoryButton(directory);
+            directoryContainer.appendChild(button);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
